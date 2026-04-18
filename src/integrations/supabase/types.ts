@@ -164,6 +164,69 @@ export type Database = {
         }
         Relationships: []
       }
+      drivers: {
+        Row: {
+          aadhaar_number: string | null
+          aadhaar_url: string | null
+          address: string | null
+          city: string | null
+          created_at: string
+          date_of_birth: string | null
+          email: string | null
+          experience_years: number | null
+          full_name: string
+          id: string
+          license_expiry: string | null
+          license_number: string
+          license_url: string | null
+          notes: string | null
+          phone: string
+          photo_url: string | null
+          status: string
+          vehicle_types: string | null
+        }
+        Insert: {
+          aadhaar_number?: string | null
+          aadhaar_url?: string | null
+          address?: string | null
+          city?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          email?: string | null
+          experience_years?: number | null
+          full_name: string
+          id?: string
+          license_expiry?: string | null
+          license_number: string
+          license_url?: string | null
+          notes?: string | null
+          phone: string
+          photo_url?: string | null
+          status?: string
+          vehicle_types?: string | null
+        }
+        Update: {
+          aadhaar_number?: string | null
+          aadhaar_url?: string | null
+          address?: string | null
+          city?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          email?: string | null
+          experience_years?: number | null
+          full_name?: string
+          id?: string
+          license_expiry?: string | null
+          license_number?: string
+          license_url?: string | null
+          notes?: string | null
+          phone?: string
+          photo_url?: string | null
+          status?: string
+          vehicle_types?: string | null
+        }
+        Relationships: []
+      }
       founders: {
         Row: {
           bio: string | null
