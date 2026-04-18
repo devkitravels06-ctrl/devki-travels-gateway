@@ -61,7 +61,6 @@ export function SiteFooter() {
 
         <div className="border-t border-background/10 mt-12 pt-6 flex flex-col md:flex-row justify-between gap-4 text-xs text-background/60">
           <p>© {new Date().getFullYear()} Devki Travels. All rights reserved.</p>
-          <p>Designed for the Government of Uttarakhand and beyond.</p>
         </div>
       </div>
     </footer>
