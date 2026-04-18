@@ -4,7 +4,7 @@ import { SITE, NAV } from "@/lib/site";
 
 export function SiteFooter() {
   return (
-    <footer className="relative bg-foreground text-background mt-20">
+    <footer className="relative bg-foreground text-background mt-20 print:hidden">
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary-glow to-transparent" />
       <div className="container mx-auto px-4 lg:px-8 py-16">
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-10">
