@@ -7,7 +7,7 @@ import fortuner from "@/assets/fleet-fortuner.jpg";
 import amaze from "@/assets/fleet-amaze.jpg";
 import scorpio from "@/assets/fleet-scorpio.jpg";
 import tempo from "@/assets/fleet-tempo.jpg";
-import etios from "@/assets/fleet-etios.jpg";
+import hycross from "@/assets/fleet-hycross.jpg";
 
 export const Route = createFileRoute("/fleet")({
   head: () => ({
@@ -24,7 +24,7 @@ const fleet = [
   { name: "Toyota Fortuner", img: fortuner, seats: 7, ac: true, type: "Luxury SUV", desc: "Commanding road presence with the comfort of a luxury car. Ideal for VIP convoys and long highway runs." },
   { name: "Mahindra Scorpio", img: scorpio, seats: 7, ac: true, type: "Rugged SUV", desc: "Built for Uttarakhand's mountains. Tested across Char Dham, Auli and the highest accessible passes." },
   { name: "Honda Amaze", img: amaze, seats: 4, ac: true, type: "Sedan", desc: "Quiet, fuel-efficient sedan for executive city travel and short outstation runs." },
-  { name: "Toyota Etios", img: etios, seats: 4, ac: true, type: "Sedan", desc: "Reliable, spacious boot — a workhorse for daily corporate hire and airport transfers." },
+  { name: "Toyota Innova HyCross", img: hycross, seats: 7, ac: true, type: "Hybrid MPV", desc: "The next-generation hybrid flagship. Whisper-quiet cabin, captain seats and superior fuel economy for VIP travel." },
   { name: "Tempo Traveller", img: tempo, seats: 17, ac: true, type: "Group Travel", desc: "12-17 seater for groups, school tours, weddings and pilgrimages. Push-back seats and ample luggage." },
 ];
 
