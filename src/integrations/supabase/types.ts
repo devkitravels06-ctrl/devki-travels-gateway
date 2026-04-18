@@ -14,16 +14,240 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      bills: {
+        Row: {
+          amount_in_words: string | null
+          bank_name: string | null
+          bill_date: string
+          bill_number: number
+          cgst_amount: number | null
+          cgst_percent: number | null
+          created_at: string
+          customer_address: string | null
+          customer_name: string
+          grand_total: number
+          gstin: string | null
+          id: string
+          igst_amount: number | null
+          igst_percent: number | null
+          less_advance: number | null
+          notes: string | null
+          particulars: Json
+          sgst_amount: number | null
+          sgst_percent: number | null
+          subtotal: number
+        }
+        Insert: {
+          amount_in_words?: string | null
+          bank_name?: string | null
+          bill_date?: string
+          bill_number?: number
+          cgst_amount?: number | null
+          cgst_percent?: number | null
+          created_at?: string
+          customer_address?: string | null
+          customer_name: string
+          grand_total?: number
+          gstin?: string | null
+          id?: string
+          igst_amount?: number | null
+          igst_percent?: number | null
+          less_advance?: number | null
+          notes?: string | null
+          particulars?: Json
+          sgst_amount?: number | null
+          sgst_percent?: number | null
+          subtotal?: number
+        }
+        Update: {
+          amount_in_words?: string | null
+          bank_name?: string | null
+          bill_date?: string
+          bill_number?: number
+          cgst_amount?: number | null
+          cgst_percent?: number | null
+          created_at?: string
+          customer_address?: string | null
+          customer_name?: string
+          grand_total?: number
+          gstin?: string | null
+          id?: string
+          igst_amount?: number | null
+          igst_percent?: number | null
+          less_advance?: number | null
+          notes?: string | null
+          particulars?: Json
+          sgst_amount?: number | null
+          sgst_percent?: number | null
+          subtotal?: number
+        }
+        Relationships: []
+      }
+      bookings: {
+        Row: {
+          created_at: string
+          drop_location: string
+          email: string
+          id: string
+          name: string
+          notes: string | null
+          passengers: number | null
+          phone: string
+          pickup_date: string
+          pickup_location: string
+          pickup_time: string | null
+          status: string
+          vehicle: string
+        }
+        Insert: {
+          created_at?: string
+          drop_location: string
+          email: string
+          id?: string
+          name: string
+          notes?: string | null
+          passengers?: number | null
+          phone: string
+          pickup_date: string
+          pickup_location: string
+          pickup_time?: string | null
+          status?: string
+          vehicle: string
+        }
+        Update: {
+          created_at?: string
+          drop_location?: string
+          email?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          passengers?: number | null
+          phone?: string
+          pickup_date?: string
+          pickup_location?: string
+          pickup_time?: string | null
+          status?: string
+          vehicle?: string
+        }
+        Relationships: []
+      }
+      contact_queries: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          is_read: boolean
+          message: string
+          name: string
+          phone: string | null
+          subject: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          is_read?: boolean
+          message: string
+          name: string
+          phone?: string | null
+          subject?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          is_read?: boolean
+          message?: string
+          name?: string
+          phone?: string | null
+          subject?: string | null
+        }
+        Relationships: []
+      }
+      founders: {
+        Row: {
+          bio: string | null
+          created_at: string
+          display_order: number
+          id: string
+          name: string
+          photo_url: string | null
+          role: string
+        }
+        Insert: {
+          bio?: string | null
+          created_at?: string
+          display_order?: number
+          id?: string
+          name: string
+          photo_url?: string | null
+          role: string
+        }
+        Update: {
+          bio?: string | null
+          created_at?: string
+          display_order?: number
+          id?: string
+          name?: string
+          photo_url?: string | null
+          role?: string
+        }
+        Relationships: []
+      }
+      site_content: {
+        Row: {
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +374,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
