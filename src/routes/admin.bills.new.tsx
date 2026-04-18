@@ -59,7 +59,7 @@ function NewBillPage() {
       customer_name: customer.name,
       customer_address: customer.address,
       gstin: SITE.gstin,
-      particulars: items,
+      particulars: items as any,
       subtotal,
       less_advance: advance,
       cgst_percent: tax.cgst, sgst_percent: tax.sgst, igst_percent: tax.igst,
