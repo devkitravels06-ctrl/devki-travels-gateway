@@ -16,8 +16,17 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as FleetRouteImport } from './routes/fleet'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as BookRouteImport } from './routes/book'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminQueriesRouteImport } from './routes/admin.queries'
+import { Route as AdminLoginRouteImport } from './routes/admin.login'
+import { Route as AdminContentRouteImport } from './routes/admin.content'
+import { Route as AdminBookingsRouteImport } from './routes/admin.bookings'
+import { Route as AdminBillsIndexRouteImport } from './routes/admin.bills.index'
+import { Route as AdminBillsNewRouteImport } from './routes/admin.bills.new'
+import { Route as AdminBillsIdRouteImport } from './routes/admin.bills.$id'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -54,6 +63,11 @@ const BookRoute = BookRouteImport.update({
   path: '/book',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
@@ -64,10 +78,51 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminQueriesRoute = AdminQueriesRouteImport.update({
+  id: '/queries',
+  path: '/queries',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminContentRoute = AdminContentRouteImport.update({
+  id: '/content',
+  path: '/content',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminBookingsRoute = AdminBookingsRouteImport.update({
+  id: '/bookings',
+  path: '/bookings',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminBillsIndexRoute = AdminBillsIndexRouteImport.update({
+  id: '/bills/',
+  path: '/bills/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminBillsNewRoute = AdminBillsNewRouteImport.update({
+  id: '/bills/new',
+  path: '/bills/new',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminBillsIdRoute = AdminBillsIdRouteImport.update({
+  id: '/bills/$id',
+  path: '/bills/$id',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRouteWithChildren
   '/book': typeof BookRoute
   '/contact': typeof ContactRoute
   '/fleet': typeof FleetRoute
@@ -75,6 +130,14 @@ export interface FileRoutesByFullPath {
   '/reviews': typeof ReviewsRoute
   '/services': typeof ServicesRoute
   '/terms': typeof TermsRoute
+  '/admin/bookings': typeof AdminBookingsRoute
+  '/admin/content': typeof AdminContentRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/queries': typeof AdminQueriesRoute
+  '/admin/': typeof AdminIndexRoute
+  '/admin/bills/$id': typeof AdminBillsIdRoute
+  '/admin/bills/new': typeof AdminBillsNewRoute
+  '/admin/bills/': typeof AdminBillsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -86,11 +149,20 @@ export interface FileRoutesByTo {
   '/reviews': typeof ReviewsRoute
   '/services': typeof ServicesRoute
   '/terms': typeof TermsRoute
+  '/admin/bookings': typeof AdminBookingsRoute
+  '/admin/content': typeof AdminContentRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/queries': typeof AdminQueriesRoute
+  '/admin': typeof AdminIndexRoute
+  '/admin/bills/$id': typeof AdminBillsIdRoute
+  '/admin/bills/new': typeof AdminBillsNewRoute
+  '/admin/bills': typeof AdminBillsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRouteWithChildren
   '/book': typeof BookRoute
   '/contact': typeof ContactRoute
   '/fleet': typeof FleetRoute
@@ -98,12 +170,21 @@ export interface FileRoutesById {
   '/reviews': typeof ReviewsRoute
   '/services': typeof ServicesRoute
   '/terms': typeof TermsRoute
+  '/admin/bookings': typeof AdminBookingsRoute
+  '/admin/content': typeof AdminContentRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/queries': typeof AdminQueriesRoute
+  '/admin/': typeof AdminIndexRoute
+  '/admin/bills/$id': typeof AdminBillsIdRoute
+  '/admin/bills/new': typeof AdminBillsNewRoute
+  '/admin/bills/': typeof AdminBillsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/about'
+    | '/admin'
     | '/book'
     | '/contact'
     | '/fleet'
@@ -111,6 +192,14 @@ export interface FileRouteTypes {
     | '/reviews'
     | '/services'
     | '/terms'
+    | '/admin/bookings'
+    | '/admin/content'
+    | '/admin/login'
+    | '/admin/queries'
+    | '/admin/'
+    | '/admin/bills/$id'
+    | '/admin/bills/new'
+    | '/admin/bills/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -122,10 +211,19 @@ export interface FileRouteTypes {
     | '/reviews'
     | '/services'
     | '/terms'
+    | '/admin/bookings'
+    | '/admin/content'
+    | '/admin/login'
+    | '/admin/queries'
+    | '/admin'
+    | '/admin/bills/$id'
+    | '/admin/bills/new'
+    | '/admin/bills'
   id:
     | '__root__'
     | '/'
     | '/about'
+    | '/admin'
     | '/book'
     | '/contact'
     | '/fleet'
@@ -133,11 +231,20 @@ export interface FileRouteTypes {
     | '/reviews'
     | '/services'
     | '/terms'
+    | '/admin/bookings'
+    | '/admin/content'
+    | '/admin/login'
+    | '/admin/queries'
+    | '/admin/'
+    | '/admin/bills/$id'
+    | '/admin/bills/new'
+    | '/admin/bills/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  AdminRoute: typeof AdminRouteWithChildren
   BookRoute: typeof BookRoute
   ContactRoute: typeof ContactRoute
   FleetRoute: typeof FleetRoute
@@ -198,6 +305,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/about': {
       id: '/about'
       path: '/about'
@@ -212,12 +326,93 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/queries': {
+      id: '/admin/queries'
+      path: '/queries'
+      fullPath: '/admin/queries'
+      preLoaderRoute: typeof AdminQueriesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/content': {
+      id: '/admin/content'
+      path: '/content'
+      fullPath: '/admin/content'
+      preLoaderRoute: typeof AdminContentRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/bookings': {
+      id: '/admin/bookings'
+      path: '/bookings'
+      fullPath: '/admin/bookings'
+      preLoaderRoute: typeof AdminBookingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/bills/': {
+      id: '/admin/bills/'
+      path: '/bills'
+      fullPath: '/admin/bills/'
+      preLoaderRoute: typeof AdminBillsIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/bills/new': {
+      id: '/admin/bills/new'
+      path: '/bills/new'
+      fullPath: '/admin/bills/new'
+      preLoaderRoute: typeof AdminBillsNewRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/bills/$id': {
+      id: '/admin/bills/$id'
+      path: '/bills/$id'
+      fullPath: '/admin/bills/$id'
+      preLoaderRoute: typeof AdminBillsIdRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
+
+interface AdminRouteChildren {
+  AdminBookingsRoute: typeof AdminBookingsRoute
+  AdminContentRoute: typeof AdminContentRoute
+  AdminLoginRoute: typeof AdminLoginRoute
+  AdminQueriesRoute: typeof AdminQueriesRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+  AdminBillsIdRoute: typeof AdminBillsIdRoute
+  AdminBillsNewRoute: typeof AdminBillsNewRoute
+  AdminBillsIndexRoute: typeof AdminBillsIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminBookingsRoute: AdminBookingsRoute,
+  AdminContentRoute: AdminContentRoute,
+  AdminLoginRoute: AdminLoginRoute,
+  AdminQueriesRoute: AdminQueriesRoute,
+  AdminIndexRoute: AdminIndexRoute,
+  AdminBillsIdRoute: AdminBillsIdRoute,
+  AdminBillsNewRoute: AdminBillsNewRoute,
+  AdminBillsIndexRoute: AdminBillsIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  AdminRoute: AdminRouteWithChildren,
   BookRoute: BookRoute,
   ContactRoute: ContactRoute,
   FleetRoute: FleetRoute,
