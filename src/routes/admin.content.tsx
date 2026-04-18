@@ -66,7 +66,7 @@ function ContentPage() {
       <div className="bg-card border border-border rounded-2xl p-6 mt-6 space-y-6">
         <h2 className="font-display text-xl font-semibold">Founders</h2>
         {founders.map((f) => (
-          <FounderEditor key={f.id} f={f} onSave={saveFounder} onUpload={uploadPhoto} setF={(nf) => setFounders((arr) => arr.map((x) => x.id === f.id ? nf : x))} />
+          <FounderEditor key={f.id} f={f} onSave={saveFounder} onUpload={uploadPhoto} setF={(nf: any) => setFounders((arr) => arr.map((x) => x.id === f.id ? nf : x))} />
         ))}
       </div>
     </div>

@@ -54,7 +54,7 @@ function NewBillPage() {
     if (!customer.name.trim()) { toast.error("Customer name required"); return; }
     if (subtotal <= 0) { toast.error("Add at least one item with amount"); return; }
     setSaving(true);
-    const { data, error } = await supabase.from("bills").insert({
+    const { data, error } = await supabase.from("bills").insert([{
       bill_date: billDate,
       customer_name: customer.name,
       customer_address: customer.address,
@@ -67,7 +67,7 @@ function NewBillPage() {
       grand_total: grandTotal,
       amount_in_words: numberToWords(grandTotal),
       bank_name: bank,
-    }).select().single();
+    }]).select().single();
     setSaving(false);
     if (error) { toast.error("Failed to save bill"); return; }
     toast.success(`Bill #${data.bill_number} saved`);
