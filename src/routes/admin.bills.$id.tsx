@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Printer, ArrowLeft } from "lucide-react";
+import { Printer, ArrowLeft, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SITE } from "@/lib/site";
 
@@ -20,17 +20,31 @@ function BillView() {
   const items = (bill.particulars as any[]) || [];
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="flex items-center justify-between mb-6 print:hidden">
-        <Link to="/admin/bills" className="inline-flex items-center gap-2 text-sm text-primary hover:underline">
-          <ArrowLeft className="w-4 h-4" />Back to bills
-        </Link>
-        <button onClick={() => window.print()} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-hero text-primary-foreground font-medium shadow-soft hover:shadow-glow transition-smooth">
-          <Printer className="w-4 h-4" />Print
-        </button>
+    <div className="max-w-5xl mx-auto">
+      {/* Header bar — hidden on print */}
+      <div className="no-print mb-6 bg-gradient-hero rounded-3xl p-6 text-primary-foreground shadow-elegant flex items-center justify-between flex-wrap gap-4">
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center">
+            <FileText className="w-7 h-7" />
+          </div>
+          <div>
+            <div className="text-xs uppercase tracking-widest opacity-80">Tax Invoice</div>
+            <div className="font-display text-2xl font-bold">Bill #{bill.bill_number}</div>
+            <div className="text-sm opacity-90">{bill.customer_name} · {new Date(bill.bill_date).toLocaleDateString("en-IN")}</div>
+          </div>
+        </div>
+        <div className="flex gap-3">
+          <Link to="/admin/bills" className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-white/15 hover:bg-white/25 transition text-sm">
+            <ArrowLeft className="w-4 h-4" />Back
+          </Link>
+          <button onClick={() => window.print()} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white text-primary font-semibold shadow-soft hover:scale-105 transition-smooth">
+            <Printer className="w-4 h-4" />Print Bill
+          </button>
+        </div>
       </div>
 
-      <div className="bg-white text-black border-2 border-black p-6 md:p-10 shadow-elegant" id="print-area">
+      {/* PRINT AREA */}
+      <div id="print-area" className="bg-white text-black border-2 border-black p-6 md:p-10 shadow-elegant rounded-lg print:rounded-none print:shadow-none">
         <div className="border-b-2 border-black pb-3">
           <div className="flex justify-between text-xs font-semibold">
             <span>GSTIN-{bill.gstin}</span>
@@ -105,7 +119,23 @@ function BillView() {
         </div>
       </div>
 
-      <style>{`@media print { body * { visibility: hidden; } #print-area, #print-area * { visibility: visible; } #print-area { position: absolute; inset: 0; box-shadow: none; border: 1px solid black; } }`}</style>
+      <style>{`
+        @media print {
+          @page { size: A4; margin: 12mm; }
+          html, body { background: white !important; }
+          body * { visibility: hidden !important; }
+          #print-area, #print-area * { visibility: visible !important; }
+          #print-area {
+            position: absolute !important;
+            left: 0; top: 0; right: 0;
+            width: 100% !important;
+            margin: 0 !important;
+            box-shadow: none !important;
+            border: 1px solid black !important;
+          }
+          .no-print { display: none !important; }
+        }
+      `}</style>
     </div>
   );
 }
