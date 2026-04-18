@@ -1,6 +1,6 @@
 import { createFileRoute, Link, Outlet, useNavigate, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { LayoutDashboard, FileText, MessageSquare, Calendar, Settings, LogOut, FileSignature } from "lucide-react";
+import { LayoutDashboard, FileText, MessageSquare, Calendar, Settings, LogOut, FileSignature, IdCard } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
@@ -14,6 +14,7 @@ const items = [
   { to: "/admin/bills", label: "All Bills", icon: FileText },
   { to: "/admin/queries", label: "Contact Queries", icon: MessageSquare },
   { to: "/admin/bookings", label: "Bookings", icon: Calendar },
+  { to: "/admin/drivers", label: "Driver Applications", icon: IdCard },
   { to: "/admin/content", label: "Site Content", icon: Settings },
 ];
 

@@ -8,6 +8,9 @@ export function SiteHeader() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const loc = useLocation();
+  const isHome = loc.pathname === "/";
+  // On non-home routes, ALWAYS use the solid (light) header so it stays visible over any content
+  const transparent = isHome && !scrolled;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -21,8 +24,8 @@ export function SiteHeader() {
   return (
     <header
       className={cn(
-        "fixed top-0 inset-x-0 z-50 transition-smooth",
-        scrolled ? "glass-light shadow-soft" : "bg-transparent"
+        "fixed top-0 inset-x-0 z-50 transition-smooth print:hidden",
+        transparent ? "bg-transparent" : "glass-light shadow-soft"
       )}
     >
       <div className="container mx-auto px-4 lg:px-8">
@@ -31,13 +34,8 @@ export function SiteHeader() {
             <div className="w-10 h-10 rounded-xl bg-gradient-hero flex items-center justify-center text-primary-foreground font-display font-bold text-lg shadow-soft group-hover:shadow-glow transition-smooth">
               D
             </div>
-            <div className="leading-tight">
-              <div className={cn("font-display font-bold text-lg", scrolled ? "text-foreground" : "text-white drop-shadow")}>
-                Devki Travels
-              </div>
-              <div className={cn("text-[10px] tracking-widest uppercase", scrolled ? "text-muted-foreground" : "text-white/80")}>
-                Govt. Trusted · Since 2017
-              </div>
+            <div className={cn("font-display font-bold text-lg leading-tight", transparent ? "text-white drop-shadow" : "text-foreground")}>
+              Devki Travels
             </div>
           </Link>
 
@@ -47,8 +45,8 @@ export function SiteHeader() {
                 key={item.to}
                 to={item.to}
                 className={cn(
-                  "px-4 py-2 text-sm font-medium rounded-md transition-smooth relative",
-                  scrolled ? "text-foreground hover:text-primary" : "text-white hover:text-primary-glow",
+                  "px-3 py-2 text-sm font-medium rounded-md transition-smooth relative",
+                  transparent ? "text-white hover:text-primary-glow" : "text-foreground hover:text-primary",
                   "hover:bg-primary/10"
                 )}
                 activeProps={{ className: "text-primary bg-primary/10" }}
@@ -64,7 +62,7 @@ export function SiteHeader() {
               href={`tel:${SITE.phone1.replace(/\s/g, "")}`}
               className={cn(
                 "flex items-center gap-2 text-sm font-medium",
-                scrolled ? "text-foreground" : "text-white"
+                transparent ? "text-white" : "text-foreground"
               )}
             >
               <Phone className="w-4 h-4" />
@@ -80,7 +78,7 @@ export function SiteHeader() {
 
           <button
             onClick={() => setOpen(!open)}
-            className={cn("lg:hidden p-2 rounded-md", scrolled ? "text-foreground" : "text-white")}
+            className={cn("lg:hidden p-2 rounded-md", transparent ? "text-white" : "text-foreground")}
             aria-label="Menu"
           >
             {open ? <X /> : <Menu />}
