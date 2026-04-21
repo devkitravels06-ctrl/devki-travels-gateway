@@ -20,6 +20,11 @@ const items = [
   { to: "/admin/content", label: "Site Content", icon: Settings },
 ];
 
+function hasStoredSessionHint() {
+  if (typeof window === "undefined") return false;
+  return Object.keys(window.localStorage).some((key) => key.startsWith("sb-") && key.endsWith("-auth-token"));
+}
+
 function AdminLayout() {
   const navigate = useNavigate();
   const router = useRouter();
@@ -28,17 +33,32 @@ function AdminLayout() {
   const [authed, setAuthed] = useState(false);
   const [email, setEmail] = useState<string>("");
 
-  // Run auth check ONCE on mount — not on every route change inside /admin
   useEffect(() => {
     if (isLoginRoute) { setChecking(false); return; }
     let cancelled = false;
+    let resolved = false;
+
+    if (!hasStoredSessionHint()) {
+      setAuthed(false);
+      setChecking(false);
+      navigate({ to: "/admin/login" });
+      return;
+    }
 
     async function check(session: any) {
+      resolved = true;
       if (!session) {
         if (!cancelled) { setAuthed(false); setChecking(false); navigate({ to: "/admin/login" }); }
         return;
       }
-      const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", session.user.id);
+      setEmail(session.user.email ?? "");
+
+      const { data: roles } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", session.user.id)
+        .limit(5);
+
       const isAdmin = roles?.some((r: any) => r.role === "admin");
       if (cancelled) return;
       if (!isAdmin) {
@@ -47,15 +67,18 @@ function AdminLayout() {
         navigate({ to: "/admin/login" });
         return;
       }
-      setEmail(session.user.email ?? "");
       setAuthed(true);
       setChecking(false);
     }
 
-    supabase.auth.getSession().then(({ data }) => check(data.session));
     const { data: sub } = supabase.auth.onAuthStateChange((_evt, session) => {
-      if (!session) { setAuthed(false); navigate({ to: "/admin/login" }); }
+      void check(session);
     });
+
+    supabase.auth.getSession().then(({ data }) => {
+      if (!resolved) void check(data.session);
+    });
+
     return () => { cancelled = true; sub.subscription.unsubscribe(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
