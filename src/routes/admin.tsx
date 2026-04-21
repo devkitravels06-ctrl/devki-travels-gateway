@@ -23,27 +23,52 @@ const items = [
 function AdminLayout() {
   const navigate = useNavigate();
   const router = useRouter();
+  const isLoginRoute = router.state.location.pathname === "/admin/login";
   const [checking, setChecking] = useState(true);
   const [authed, setAuthed] = useState(false);
   const [email, setEmail] = useState<string>("");
 
+  // Run auth check ONCE on mount — not on every route change inside /admin
   useEffect(() => {
-    const path = router.state.location.pathname;
-    if (path === "/admin/login") { setChecking(false); return; }
-    (async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) { navigate({ to: "/admin/login" }); return; }
+    if (isLoginRoute) { setChecking(false); return; }
+    let cancelled = false;
+
+    async function check(session: any) {
+      if (!session) {
+        if (!cancelled) { setAuthed(false); setChecking(false); navigate({ to: "/admin/login" }); }
+        return;
+      }
       const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", session.user.id);
       const isAdmin = roles?.some((r: any) => r.role === "admin");
-      if (!isAdmin) { await supabase.auth.signOut(); navigate({ to: "/admin/login" }); return; }
+      if (cancelled) return;
+      if (!isAdmin) {
+        await supabase.auth.signOut();
+        setAuthed(false); setChecking(false);
+        navigate({ to: "/admin/login" });
+        return;
+      }
       setEmail(session.user.email ?? "");
       setAuthed(true);
       setChecking(false);
-    })();
-  }, [router.state.location.pathname, navigate]);
+    }
 
-  if (router.state.location.pathname === "/admin/login") return <Outlet />;
-  if (checking) return <div className="min-h-screen flex items-center justify-center bg-gradient-sky"><div className="animate-pulse text-muted-foreground">Verifying access…</div></div>;
+    supabase.auth.getSession().then(({ data }) => check(data.session));
+    const { data: sub } = supabase.auth.onAuthStateChange((_evt, session) => {
+      if (!session) { setAuthed(false); navigate({ to: "/admin/login" }); }
+    });
+    return () => { cancelled = true; sub.subscription.unsubscribe(); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  if (isLoginRoute) return <Outlet />;
+  if (checking) return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#061a36] via-[#0b2545] to-[#061a36]">
+      <div className="flex flex-col items-center gap-4">
+        <div className="w-12 h-12 rounded-full border-4 border-white/20 border-t-amber-400 animate-spin" />
+        <div className="text-white/80 text-sm tracking-widest uppercase">Verifying access…</div>
+      </div>
+    </div>
+  );
   if (!authed) return null;
 
   return (
