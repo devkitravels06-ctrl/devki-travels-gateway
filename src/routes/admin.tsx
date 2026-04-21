@@ -1,8 +1,9 @@
 import { createFileRoute, Link, Outlet, useNavigate, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { LayoutDashboard, FileText, MessageSquare, Calendar, Settings, LogOut, FileSignature, IdCard, Sparkles, Bell } from "lucide-react";
+import { LayoutDashboard, FileText, MessageSquare, Calendar, Settings, LogOut, FileSignature, IdCard, Sparkles, Bell, Tag } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import logo from "@/assets/devki-logo.png";
 
 export const Route = createFileRoute("/admin")({
   component: AdminLayout,
@@ -12,6 +13,7 @@ const items = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { to: "/admin/bills/new", label: "Generate Bill", icon: FileSignature },
   { to: "/admin/bills", label: "All Bills", icon: FileText },
+  { to: "/admin/offers", label: "Service Offers", icon: Tag },
   { to: "/admin/queries", label: "Contact Queries", icon: MessageSquare },
   { to: "/admin/bookings", label: "Bookings", icon: Calendar },
   { to: "/admin/drivers", label: "Driver Applications", icon: IdCard },
