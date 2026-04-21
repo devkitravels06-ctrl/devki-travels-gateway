@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Briefcase, Plane, Mountain, Users, Building2, Calendar, Car, Truck } from "lucide-react";
 import { PageBackground } from "@/components/PageBackground";
+import { OfferCards } from "@/components/OfferCards";
 import bg from "@/assets/hero-mountain.jpg";
 
 export const Route = createFileRoute("/services")({
