@@ -57,6 +57,8 @@ function ServicesPage() {
           </div>
         </div>
       </section>
+
+      <OfferCards />
     </PageBackground>
   );
 }
