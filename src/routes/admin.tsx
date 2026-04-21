@@ -55,7 +55,9 @@ function AdminLayout() {
         <div className="absolute bottom-0 -left-20 w-56 h-56 rounded-full bg-[oklch(0.72_0.16_235)]/30 blur-3xl pointer-events-none" />
 
         <Link to="/" className="relative px-6 py-6 border-b border-white/10 flex items-center gap-3">
-          <div className="w-11 h-11 rounded-xl bg-gradient-hero flex items-center justify-center font-display font-bold text-lg text-white shadow-glow">D</div>
+          <div className="w-12 h-12 rounded-xl bg-white p-1 shadow-glow flex items-center justify-center">
+            <img src={logo} alt="Devki Travels" className="w-full h-full object-contain" />
+          </div>
           <div className="leading-tight">
             <div className="font-display font-bold text-lg">Devki Travels</div>
             <div className="text-[10px] uppercase tracking-[0.2em] text-white/60 flex items-center gap-1">
