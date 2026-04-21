@@ -36,7 +36,7 @@ function ServicesPage() {
         </div>
       </section>
 
-      <section className="pb-24">
+      <section className="pb-12">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {services.map((s, i) => (
