@@ -25,8 +25,11 @@ function BookingsPage() {
   }
 
   return (
-    <div>
-      <h1 className="text-3xl font-display font-bold mb-6">Bookings</h1>
+    <div className="max-w-5xl space-y-6">
+      <div>
+        <h1 className="text-3xl font-display font-bold text-foreground">Bookings</h1>
+        <p className="text-sm text-muted-foreground mt-1">Manage incoming ride bookings and update their status.</p>
+      </div>
       <div className="space-y-4">
         {items.map((b) => (
           <div key={b.id} className="bg-card border border-border rounded-2xl p-5 hover-lift">

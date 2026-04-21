@@ -22,6 +22,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminQueriesRouteImport } from './routes/admin.queries'
+import { Route as AdminOffersRouteImport } from './routes/admin.offers'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminDriversRouteImport } from './routes/admin.drivers'
 import { Route as AdminContentRouteImport } from './routes/admin.content'
@@ -95,6 +96,11 @@ const AdminQueriesRoute = AdminQueriesRouteImport.update({
   path: '/queries',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminOffersRoute = AdminOffersRouteImport.update({
+  id: '/offers',
+  path: '/offers',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -147,6 +153,7 @@ export interface FileRoutesByFullPath {
   '/admin/content': typeof AdminContentRoute
   '/admin/drivers': typeof AdminDriversRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/offers': typeof AdminOffersRoute
   '/admin/queries': typeof AdminQueriesRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/bills/$id': typeof AdminBillsIdRoute
@@ -168,6 +175,7 @@ export interface FileRoutesByTo {
   '/admin/content': typeof AdminContentRoute
   '/admin/drivers': typeof AdminDriversRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/offers': typeof AdminOffersRoute
   '/admin/queries': typeof AdminQueriesRoute
   '/admin': typeof AdminIndexRoute
   '/admin/bills/$id': typeof AdminBillsIdRoute
@@ -191,6 +199,7 @@ export interface FileRoutesById {
   '/admin/content': typeof AdminContentRoute
   '/admin/drivers': typeof AdminDriversRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/offers': typeof AdminOffersRoute
   '/admin/queries': typeof AdminQueriesRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/bills/$id': typeof AdminBillsIdRoute
@@ -215,6 +224,7 @@ export interface FileRouteTypes {
     | '/admin/content'
     | '/admin/drivers'
     | '/admin/login'
+    | '/admin/offers'
     | '/admin/queries'
     | '/admin/'
     | '/admin/bills/$id'
@@ -236,6 +246,7 @@ export interface FileRouteTypes {
     | '/admin/content'
     | '/admin/drivers'
     | '/admin/login'
+    | '/admin/offers'
     | '/admin/queries'
     | '/admin'
     | '/admin/bills/$id'
@@ -258,6 +269,7 @@ export interface FileRouteTypes {
     | '/admin/content'
     | '/admin/drivers'
     | '/admin/login'
+    | '/admin/offers'
     | '/admin/queries'
     | '/admin/'
     | '/admin/bills/$id'
@@ -372,6 +384,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminQueriesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/offers': {
+      id: '/admin/offers'
+      path: '/offers'
+      fullPath: '/admin/offers'
+      preLoaderRoute: typeof AdminOffersRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/login': {
       id: '/admin/login'
       path: '/login'
@@ -429,6 +448,7 @@ interface AdminRouteChildren {
   AdminContentRoute: typeof AdminContentRoute
   AdminDriversRoute: typeof AdminDriversRoute
   AdminLoginRoute: typeof AdminLoginRoute
+  AdminOffersRoute: typeof AdminOffersRoute
   AdminQueriesRoute: typeof AdminQueriesRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AdminBillsIdRoute: typeof AdminBillsIdRoute
@@ -441,6 +461,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminContentRoute: AdminContentRoute,
   AdminDriversRoute: AdminDriversRoute,
   AdminLoginRoute: AdminLoginRoute,
+  AdminOffersRoute: AdminOffersRoute,
   AdminQueriesRoute: AdminQueriesRoute,
   AdminIndexRoute: AdminIndexRoute,
   AdminBillsIdRoute: AdminBillsIdRoute,
@@ -466,3 +487,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}

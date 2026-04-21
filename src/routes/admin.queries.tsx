@@ -21,8 +21,11 @@ function QueriesPage() {
   async function remove(id: string) { if (!confirm("Delete this query?")) return; await supabase.from("contact_queries").delete().eq("id", id); toast.success("Deleted"); load(); }
 
   return (
-    <div>
-      <h1 className="text-3xl font-display font-bold mb-6">Contact Queries</h1>
+    <div className="max-w-5xl space-y-6">
+      <div>
+        <h1 className="text-3xl font-display font-bold text-foreground">Contact Queries</h1>
+        <p className="text-sm text-muted-foreground mt-1">Messages submitted from the website contact form.</p>
+      </div>
       <div className="space-y-4">
         {items.map((q) => (
           <div key={q.id} className={`bg-card border rounded-2xl p-5 ${q.is_read ? "border-border" : "border-primary shadow-soft"}`}>

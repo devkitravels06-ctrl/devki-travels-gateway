@@ -257,6 +257,51 @@ export type Database = {
         }
         Relationships: []
       }
+      service_offers: {
+        Row: {
+          created_at: string
+          discount_label: string | null
+          display_order: number
+          id: string
+          image_url: string | null
+          is_active: boolean
+          price_label: string | null
+          subtitle: string | null
+          title: string
+          updated_at: string
+          whatsapp_message: string
+          whatsapp_number: string
+        }
+        Insert: {
+          created_at?: string
+          discount_label?: string | null
+          display_order?: number
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          price_label?: string | null
+          subtitle?: string | null
+          title: string
+          updated_at?: string
+          whatsapp_message?: string
+          whatsapp_number?: string
+        }
+        Update: {
+          created_at?: string
+          discount_label?: string | null
+          display_order?: number
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          price_label?: string | null
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+          whatsapp_message?: string
+          whatsapp_number?: string
+        }
+        Relationships: []
+      }
       site_content: {
         Row: {
           key: string

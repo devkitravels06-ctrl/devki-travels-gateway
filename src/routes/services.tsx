@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Briefcase, Plane, Mountain, Users, Building2, Calendar, Car, Truck } from "lucide-react";
 import { PageBackground } from "@/components/PageBackground";
+import { OfferCards } from "@/components/OfferCards";
 import bg from "@/assets/hero-mountain.jpg";
 
 export const Route = createFileRoute("/services")({
@@ -35,7 +36,7 @@ function ServicesPage() {
         </div>
       </section>
 
-      <section className="pb-24">
+      <section className="pb-12">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {services.map((s, i) => (
@@ -56,6 +57,8 @@ function ServicesPage() {
           </div>
         </div>
       </section>
+
+      <OfferCards />
     </PageBackground>
   );
 }
