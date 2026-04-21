@@ -53,13 +53,10 @@ function AdminLayout() {
       }
       setEmail(session.user.email ?? "");
 
-      const { data: roles } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", session.user.id)
-        .limit(5);
-
-      const isAdmin = roles?.some((r: any) => r.role === "admin");
+      const { data: isAdmin } = await supabase.rpc("has_role", {
+        _user_id: session.user.id,
+        _role: "admin",
+      });
       if (cancelled) return;
       if (!isAdmin) {
         await supabase.auth.signOut();
