@@ -50,10 +50,13 @@ function ContentPage() {
   }
 
   return (
-    <div className="max-w-4xl">
-      <h1 className="text-3xl font-display font-bold mb-6">Site Content</h1>
+    <div className="max-w-4xl space-y-6">
+      <div>
+        <h1 className="text-3xl font-display font-bold text-foreground">Site Content</h1>
+        <p className="text-sm text-muted-foreground mt-1">Edit your About, Mission, Vision text and founder profiles.</p>
+      </div>
 
-      <div className="bg-card border border-border rounded-2xl p-6 space-y-4">
+      <div className="bg-card border border-border rounded-2xl p-6 space-y-4 shadow-soft">
         <h2 className="font-display text-xl font-semibold">About / Mission / Vision</h2>
         <Field label="About text" value={about} onChange={setAbout} rows={3} />
         <Field label="Our Mission" value={mission} onChange={setMission} rows={3} />
