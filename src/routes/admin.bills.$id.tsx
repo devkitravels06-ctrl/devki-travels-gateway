@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Printer, ArrowLeft, FileText, Download, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SITE } from "@/lib/site";
+import logo from "@/assets/devki-logo.png";
 
 export const Route = createFileRoute("/admin/bills/$id")({
   component: BillView,
@@ -62,12 +63,16 @@ function BillView() {
         {/* Letterhead */}
         <div className="px-8 py-5 print:px-6 print:py-4 border-b-2 border-black">
           <div className="flex justify-between items-start gap-6">
-            <div className="flex-1">
-              <div className="font-display font-extrabold text-[26px] leading-tight tracking-wide text-[#0b2545]">DEVKI TRAVELS</div>
-              <div className="text-[11px] text-gray-700 mt-0.5 italic">Deals In : (AC / Non AC) Innova · Tavera · Scorpio · Tempo Traveller · Tata Indica / Indigo</div>
-              <div className="text-[11px] text-gray-800 mt-2 leading-relaxed">
-                <div><span className="font-semibold">Address:</span> {SITE.address}</div>
-                <div className="mt-0.5"><span className="font-semibold">Mobile:</span> {SITE.phone1}, {SITE.phone2} &nbsp;·&nbsp; <span className="font-semibold">Email:</span> {SITE.email}</div>
+            <div className="flex items-start gap-4 flex-1">
+              <img src={logo} alt="Devki Travels" className="w-24 h-24 object-contain shrink-0" />
+              <div className="flex-1">
+                <div className="font-display font-extrabold text-[26px] leading-tight tracking-wide text-[#0b2545]">DEVKI TRAVELS</div>
+                <div className="text-[10px] uppercase tracking-[0.25em] text-amber-600 font-semibold mt-0.5">Travel Uttarakhand · Travel Comfortably</div>
+                <div className="text-[11px] text-gray-700 mt-1 italic">Deals In : (AC / Non AC) Innova · Tavera · Scorpio · Tempo Traveller · Tata Indica / Indigo</div>
+                <div className="text-[11px] text-gray-800 mt-2 leading-relaxed">
+                  <div><span className="font-semibold">Address:</span> {SITE.address}</div>
+                  <div className="mt-0.5"><span className="font-semibold">Mobile:</span> {SITE.phone1}, {SITE.phone2} &nbsp;·&nbsp; <span className="font-semibold">Email:</span> {SITE.email}</div>
+                </div>
               </div>
             </div>
             <div className="text-right text-[11px] border border-gray-400 rounded p-2 min-w-[180px]">
