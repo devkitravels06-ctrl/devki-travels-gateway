@@ -105,6 +105,7 @@ function AdminDashboard() {
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {[
             { to: "/admin/bills/new", label: "New Bill", icon: FileSignature, color: "from-blue-500 to-indigo-600" },
+            { to: "/admin/content", label: "Edit About / Mission / Founders", icon: Users, color: "from-pink-500 to-rose-600" },
             { to: "/admin/queries", label: "View Queries", icon: MessageSquare, color: "from-purple-500 to-fuchsia-600" },
             { to: "/admin/bookings", label: "Manage Bookings", icon: Calendar, color: "from-teal-500 to-emerald-600" },
             { to: "/admin/drivers", label: "Driver Apps", icon: IdCard, color: "from-amber-500 to-rose-600" },
