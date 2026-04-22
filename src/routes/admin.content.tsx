@@ -99,14 +99,24 @@ function ContentPage() {
   }
 
   return (
-    <div className="max-w-5xl space-y-6">
-      <div>
-        <h1 className="text-3xl font-display font-bold text-foreground">Site Content</h1>
-        <p className="text-sm text-muted-foreground mt-1">Edit your About, Mission, Vision text and manage founder profiles shown on the About page.</p>
+    <div className="max-w-5xl mx-auto space-y-8 pb-12">
+      <div className="rounded-3xl bg-gradient-to-r from-[oklch(0.22_0.08_250)] to-primary text-white p-6 lg:p-8 shadow-elegant">
+        <h1 className="text-2xl lg:text-3xl font-display font-bold">Site Content</h1>
+        <p className="text-sm text-white/80 mt-1.5">Edit About / Mission / Vision text and manage founder profiles shown on the About page.</p>
+        <div className="flex flex-wrap gap-2 mt-4 text-[11px]">
+          <a href="#mission-block" className="px-3 py-1.5 rounded-full bg-white/15 hover:bg-white/25 transition">↓ About / Mission / Vision</a>
+          <a href="#founders-block" className="px-3 py-1.5 rounded-full bg-white/15 hover:bg-white/25 transition">↓ Founders & Co-Founders</a>
+        </div>
       </div>
 
-      <div className="bg-card border border-border rounded-2xl p-6 space-y-4 shadow-soft">
-        <h2 className="font-display text-xl font-semibold">About / Mission / Vision</h2>
+      <div id="mission-block" className="bg-card border border-border rounded-2xl p-6 space-y-4 shadow-soft scroll-mt-24">
+        <div className="flex items-center gap-3 pb-2 border-b border-border">
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold">📝</div>
+          <div>
+            <h2 className="font-display text-xl font-semibold">About / Mission / Vision</h2>
+            <p className="text-xs text-muted-foreground">Shown on the public About page</p>
+          </div>
+        </div>
         <Field label="About text" value={about} onChange={setAbout} rows={3} />
         <Field label="Our Mission" value={mission} onChange={setMission} rows={3} />
         <Field label="Our Vision" value={vision} onChange={setVision} rows={3} />
@@ -115,7 +125,7 @@ function ContentPage() {
         </button>
       </div>
 
-      <div className="bg-card border border-border rounded-2xl p-6 space-y-5 shadow-soft">
+      <div id="founders-block" className="bg-card border border-border rounded-2xl p-6 space-y-5 shadow-soft scroll-mt-24">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
