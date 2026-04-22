@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Plus, Trash2, Save, Printer } from "lucide-react";
+import { Plus, Trash2, Save, Printer, Car, Fuel, Route as RouteIcon } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { SITE } from "@/lib/site";
@@ -10,6 +10,23 @@ export const Route = createFileRoute("/admin/bills/new")({
 });
 
 interface Item { particulars: string; rate: number; amount: number; }
+
+const BANK_OPTIONS = [
+  {
+    id: "utgb",
+    label: "UTGB — Uttarakhand Gramin Bank",
+    name: "UTGB (Uttarakhand Gramin Bank)",
+    account: "76020834813",
+    ifsc: "SBIN0RRUTGB",
+  },
+  {
+    id: "union",
+    label: "Union Bank of India",
+    name: "Union Bank of India",
+    account: "602501010050357",
+    ifsc: "UBIN0560251",
+  },
+];
 
 function numberToWords(num: number): string {
   if (num === 0) return "Zero";
@@ -23,26 +40,54 @@ function numberToWords(num: number): string {
     if (n < 10000000) return inWords(Math.floor(n/100000)) + " Lakh" + (n%100000 ? " " + inWords(n%100000) : "");
     return inWords(Math.floor(n/10000000)) + " Crore" + (n%10000000 ? " " + inWords(n%10000000) : "");
   };
-  const rupees = Math.floor(num);
-  const paise = Math.round((num - rupees) * 100);
-  return `${inWords(rupees)} Rupees${paise ? " and " + inWords(paise) + " Paise" : ""} Only`;
+  return `${inWords(Math.round(num))} Rupees Only`;
 }
 
 function NewBillPage() {
   const navigate = useNavigate();
   const [customer, setCustomer] = useState({ name: "", address: "" });
   const [billDate, setBillDate] = useState(new Date().toISOString().slice(0, 10));
-  const [items, setItems] = useState<Item[]>([{ particulars: "", rate: 0, amount: 0 }]);
-  const [tax, setTax] = useState({ cgst: 0, sgst: 0, igst: 0 });
+  const [items, setItems] = useState<Item[]>([
+    { particulars: "Vehicle Hire — ", rate: 0, amount: 0 },
+  ]);
+  const [kmAmount, setKmAmount] = useState(0);
+  const [fuelAmount, setFuelAmount] = useState(0);
+  const [gstMode, setGstMode] = useState<"none" | "exclusive" | "inclusive">("none");
+  const [gstType, setGstType] = useState<"cgst_sgst" | "igst">("cgst_sgst");
+  const [gstRate, setGstRate] = useState(5);
   const [advance, setAdvance] = useState(0);
-  const [bank, setBank] = useState("");
+  const [bankId, setBankId] = useState(BANK_OPTIONS[0].id);
   const [saving, setSaving] = useState(false);
 
-  const subtotal = useMemo(() => items.reduce((s, i) => s + (Number(i.amount) || 0), 0), [items]);
-  const cgstAmt = (subtotal * tax.cgst) / 100;
-  const sgstAmt = (subtotal * tax.sgst) / 100;
-  const igstAmt = (subtotal * tax.igst) / 100;
-  const grandTotal = subtotal - advance + cgstAmt + sgstAmt + igstAmt;
+  const selectedBank = BANK_OPTIONS.find((b) => b.id === bankId)!;
+
+  // vehicle subtotal = particulars only
+  const vehicleSubtotal = useMemo(
+    () => items.reduce((s, i) => s + (Number(i.amount) || 0), 0),
+    [items]
+  );
+
+  // GST applies to vehicle subtotal only (KM/Fuel are reimbursements)
+  const { taxableValue, totalGst, cgstAmt, sgstAmt, igstAmt } = useMemo(() => {
+    let taxable = vehicleSubtotal;
+    let total = 0;
+    if (gstMode === "exclusive") {
+      total = Math.round((vehicleSubtotal * gstRate) / 100);
+    } else if (gstMode === "inclusive") {
+      // reverse-calc: vehicleSubtotal includes GST
+      taxable = Math.round(vehicleSubtotal / (1 + gstRate / 100));
+      total = vehicleSubtotal - taxable;
+    }
+    const cgst = gstType === "cgst_sgst" ? Math.round(total / 2) : 0;
+    const sgst = gstType === "cgst_sgst" ? total - cgst : 0;
+    const igst = gstType === "igst" ? total : 0;
+    return { taxableValue: taxable, totalGst: total, cgstAmt: cgst, sgstAmt: sgst, igstAmt: igst };
+  }, [vehicleSubtotal, gstMode, gstRate, gstType]);
+
+  // Final layout per spec:
+  // (vehicle taxable + GST) + KM amount + Fuel amount − advance
+  const vehicleWithGst = gstMode === "inclusive" ? vehicleSubtotal : taxableValue + totalGst;
+  const grandTotal = Math.round(vehicleWithGst + Number(kmAmount || 0) + Number(fuelAmount || 0) - Number(advance || 0));
 
   function updateItem(i: number, patch: Partial<Item>) {
     setItems((arr) => arr.map((it, idx) => idx === i ? { ...it, ...patch } : it));
@@ -52,24 +97,39 @@ function NewBillPage() {
 
   async function save() {
     if (!customer.name.trim()) { toast.error("Customer name required"); return; }
-    if (subtotal <= 0) { toast.error("Add at least one item with amount"); return; }
+    if (vehicleSubtotal <= 0) { toast.error("Add at least one vehicle/particular item"); return; }
     setSaving(true);
+
+    // Pack KM/fuel as additional particulars rows so the printable bill renders them too
+    const allParticulars = [
+      ...items,
+      ...(kmAmount > 0 ? [{ particulars: "Kilometre Travel Charges", rate: 0, amount: Math.round(kmAmount) }] : []),
+      ...(fuelAmount > 0 ? [{ particulars: "Fuel Charges", rate: 0, amount: Math.round(fuelAmount) }] : []),
+    ];
+
+    const bankString = `${selectedBank.name}  •  A/C No: ${selectedBank.account}  •  IFSC: ${selectedBank.ifsc}`;
+
     const { data, error } = await supabase.from("bills").insert([{
       bill_date: billDate,
       customer_name: customer.name,
       customer_address: customer.address,
       gstin: SITE.gstin,
-      particulars: items as any,
-      subtotal,
-      less_advance: advance,
-      cgst_percent: tax.cgst, sgst_percent: tax.sgst, igst_percent: tax.igst,
-      cgst_amount: cgstAmt, sgst_amount: sgstAmt, igst_amount: igstAmt,
+      particulars: allParticulars as any,
+      subtotal: Math.round(vehicleSubtotal + Number(kmAmount || 0) + Number(fuelAmount || 0)),
+      less_advance: Math.round(advance),
+      cgst_percent: gstType === "cgst_sgst" ? gstRate / 2 : 0,
+      sgst_percent: gstType === "cgst_sgst" ? gstRate / 2 : 0,
+      igst_percent: gstType === "igst" ? gstRate : 0,
+      cgst_amount: cgstAmt,
+      sgst_amount: sgstAmt,
+      igst_amount: igstAmt,
       grand_total: grandTotal,
       amount_in_words: numberToWords(grandTotal),
-      bank_name: bank,
+      bank_name: bankString,
+      notes: gstMode === "inclusive" ? "Amounts shown are inclusive of GST." : null,
     }]).select().single();
     setSaving(false);
-    if (error) { toast.error("Failed to save bill"); return; }
+    if (error) { toast.error("Failed to save bill: " + error.message); return; }
     toast.success(`Bill #${data.bill_number} saved`);
     navigate({ to: "/admin/bills/$id", params: { id: data.id } });
   }
@@ -79,7 +139,7 @@ function NewBillPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-display font-bold">Generate Bill</h1>
-          <p className="text-muted-foreground text-sm mt-1">GST Tax Invoice · matches your physical book format</p>
+          <p className="text-muted-foreground text-sm mt-1">GST Tax Invoice · Government-grade format</p>
         </div>
         <Link to="/admin/bills" className="text-sm text-primary hover:underline">← All bills</Link>
       </div>
@@ -115,13 +175,17 @@ function NewBillPage() {
           </div>
         </div>
 
-        {/* Particulars */}
+        {/* Particulars (Vehicle Hire) */}
+        <div className="flex items-center gap-2 mb-2">
+          <Car className="w-4 h-4 text-primary" />
+          <h3 className="font-semibold text-sm uppercase tracking-wider">Vehicle / Service Particulars</h3>
+        </div>
         <div className="border border-border rounded-xl overflow-hidden">
           <div className="grid grid-cols-12 bg-secondary text-xs font-semibold uppercase tracking-wider">
             <div className="col-span-1 p-3 border-r border-border">S.No.</div>
             <div className="col-span-7 p-3 border-r border-border">Particulars</div>
-            <div className="col-span-2 p-3 border-r border-border">Rate</div>
-            <div className="col-span-2 p-3">Amount</div>
+            <div className="col-span-2 p-3 border-r border-border">Rate (₹)</div>
+            <div className="col-span-2 p-3">Amount (₹)</div>
           </div>
           {items.map((it, i) => (
             <div key={i} className="grid grid-cols-12 border-t border-border items-center">
@@ -130,10 +194,10 @@ function NewBillPage() {
                 <input value={it.particulars} onChange={(e) => updateItem(i, { particulars: e.target.value })} className="w-full bg-transparent outline-none px-2 py-1.5 text-sm" placeholder="e.g., Innova Crysta hire — Dehradun to Mussoorie" />
               </div>
               <div className="col-span-2 p-2 border-l border-border">
-                <input type="number" value={it.rate || ""} onChange={(e) => updateItem(i, { rate: Number(e.target.value) })} className="w-full bg-transparent outline-none px-2 py-1.5 text-sm" placeholder="0" />
+                <input type="number" value={it.rate || ""} onChange={(e) => updateItem(i, { rate: Math.round(Number(e.target.value)) })} className="w-full bg-transparent outline-none px-2 py-1.5 text-sm" placeholder="0" />
               </div>
               <div className="col-span-2 p-2 border-l border-border flex items-center gap-1">
-                <input type="number" value={it.amount || ""} onChange={(e) => updateItem(i, { amount: Number(e.target.value) })} className="w-full bg-transparent outline-none px-2 py-1.5 text-sm" placeholder="0" />
+                <input type="number" value={it.amount || ""} onChange={(e) => updateItem(i, { amount: Math.round(Number(e.target.value)) })} className="w-full bg-transparent outline-none px-2 py-1.5 text-sm" placeholder="0" />
                 {items.length > 1 && (
                   <button onClick={() => removeRow(i)} className="text-destructive p-1 hover:bg-destructive/10 rounded"><Trash2 className="w-3.5 h-3.5" /></button>
                 )}
@@ -145,34 +209,94 @@ function NewBillPage() {
           </button>
         </div>
 
-        {/* Totals + Tax */}
+        {/* KM + Fuel block */}
+        <div className="grid md:grid-cols-2 gap-4 mt-6">
+          <div className="border border-border rounded-xl p-4 bg-gradient-to-br from-blue-50/40 to-transparent">
+            <Label className="flex items-center gap-1.5"><RouteIcon className="w-3.5 h-3.5 text-blue-600" />Kilometre Travel Amount (₹)</Label>
+            <input type="number" value={kmAmount || ""} onChange={(e) => setKmAmount(Math.round(Number(e.target.value)))} className="input" placeholder="e.g., 4500" />
+            <p className="text-[10px] text-muted-foreground mt-1.5">Optional — distance / per-km charges. Added on top of vehicle total.</p>
+          </div>
+          <div className="border border-border rounded-xl p-4 bg-gradient-to-br from-amber-50/40 to-transparent">
+            <Label className="flex items-center gap-1.5"><Fuel className="w-3.5 h-3.5 text-amber-600" />Fuel Charges (₹)</Label>
+            <input type="number" value={fuelAmount || ""} onChange={(e) => setFuelAmount(Math.round(Number(e.target.value)))} className="input" placeholder="e.g., 2300" />
+            <p className="text-[10px] text-muted-foreground mt-1.5">Optional — fuel reimbursement. Added on top of vehicle total.</p>
+          </div>
+        </div>
+
+        {/* Bank + GST + Totals */}
         <div className="grid md:grid-cols-2 gap-6 mt-6">
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div>
-              <Label>Bank Name</Label>
-              <input value={bank} onChange={(e) => setBank(e.target.value)} className="input" placeholder="e.g., SBI Doiwala — A/c xxxx" />
+              <Label>Bank Account</Label>
+              <select value={bankId} onChange={(e) => setBankId(e.target.value)} className="input">
+                {BANK_OPTIONS.map((b) => (
+                  <option key={b.id} value={b.id}>{b.label}</option>
+                ))}
+              </select>
+              <div className="mt-2 text-[11px] text-muted-foreground bg-secondary rounded-lg p-2.5 leading-relaxed">
+                <div><span className="font-semibold text-foreground">A/C No.:</span> {selectedBank.account}</div>
+                <div><span className="font-semibold text-foreground">IFSC:</span> {selectedBank.ifsc}</div>
+              </div>
             </div>
             <div>
               <Label>Less Advance (₹)</Label>
-              <input type="number" value={advance || ""} onChange={(e) => setAdvance(Number(e.target.value))} className="input" placeholder="0" />
+              <input type="number" value={advance || ""} onChange={(e) => setAdvance(Math.round(Number(e.target.value)))} className="input" placeholder="0" />
             </div>
+            <div>
+              <Label>GST Mode</Label>
+              <select value={gstMode} onChange={(e) => setGstMode(e.target.value as any)} className="input">
+                <option value="none">No GST</option>
+                <option value="exclusive">Exclusive of GST (add on top)</option>
+                <option value="inclusive">Inclusive of GST (already in price)</option>
+              </select>
+            </div>
+            {gstMode !== "none" && (
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>GST Type</Label>
+                  <select value={gstType} onChange={(e) => setGstType(e.target.value as any)} className="input">
+                    <option value="cgst_sgst">CGST + SGST (intra-state)</option>
+                    <option value="igst">IGST (inter-state)</option>
+                  </select>
+                </div>
+                <div>
+                  <Label>GST Rate (%)</Label>
+                  <select value={gstRate} onChange={(e) => setGstRate(Number(e.target.value))} className="input">
+                    <option value={5}>5%</option>
+                    <option value={12}>12%</option>
+                    <option value={18}>18%</option>
+                    <option value={28}>28%</option>
+                  </select>
+                </div>
+              </div>
+            )}
           </div>
-          <div className="bg-secondary rounded-xl p-4 space-y-2 text-sm">
-            <Row label="Total" value={subtotal} />
-            <Row label="Less Adv." value={advance} negative />
-            <Row label={`Bal. Rs.`} value={subtotal - advance} bold />
-            <div className="grid grid-cols-3 gap-2 pt-3">
-              <TaxInput label="CGST %" v={tax.cgst} on={(v) => setTax({ ...tax, cgst: v })} />
-              <TaxInput label="SGST %" v={tax.sgst} on={(v) => setTax({ ...tax, sgst: v })} />
-              <TaxInput label="IGST %" v={tax.igst} on={(v) => setTax({ ...tax, igst: v })} />
+
+          <div className="bg-gradient-to-br from-secondary to-secondary/40 rounded-xl p-5 space-y-2 text-sm border border-border">
+            <Row label="Vehicle Subtotal" value={gstMode === "inclusive" ? taxableValue : vehicleSubtotal} />
+            {gstMode !== "none" && totalGst > 0 && (
+              <>
+                {gstType === "cgst_sgst" ? (
+                  <>
+                    <Row label={`CGST @ ${gstRate / 2}%`} value={cgstAmt} small />
+                    <Row label={`SGST @ ${gstRate / 2}%`} value={sgstAmt} small />
+                  </>
+                ) : (
+                  <Row label={`IGST @ ${gstRate}%`} value={igstAmt} small />
+                )}
+                <Row label="Vehicle (incl. GST)" value={vehicleWithGst} bold />
+              </>
+            )}
+            {kmAmount > 0 && <Row label="+ Kilometre Travel" value={Math.round(kmAmount)} />}
+            {fuelAmount > 0 && <Row label="+ Fuel Charges" value={Math.round(fuelAmount)} />}
+            {advance > 0 && <Row label="− Less Advance" value={Math.round(advance)} negative />}
+            <div className="border-t-2 border-foreground pt-2 mt-2">
+              <Row label="GRAND TOTAL" value={grandTotal} bold large />
             </div>
-            <Row label={`CGST @ ${tax.cgst}%`} value={cgstAmt} small />
-            <Row label={`SGST @ ${tax.sgst}%`} value={sgstAmt} small />
-            <Row label={`IGST @ ${tax.igst}%`} value={igstAmt} small />
-            <div className="border-t border-border pt-2 mt-2">
-              <Row label="Grand Total" value={grandTotal} bold large />
+            <div className="text-xs italic pt-2 text-muted-foreground border-t border-border mt-2">
+              <span className="font-semibold not-italic">In Words: </span>
+              {numberToWords(grandTotal)}
             </div>
-            <div className="text-xs italic pt-2">Rupees: {numberToWords(grandTotal)}</div>
           </div>
         </div>
 
@@ -184,11 +308,6 @@ function NewBillPage() {
             <Printer className="w-4 h-4" />Preview Print
           </button>
         </div>
-
-        <div className="mt-6 flex justify-between text-xs text-muted-foreground">
-          <div>E. & O.E.<br/>All Disputes subject to Dehradun Jurisdiction only.</div>
-          <div className="text-right">For DEVKI TRAVELS<br/><span className="font-semibold mt-4 inline-block">Auth. Signatory</span></div>
-        </div>
       </div>
     </div>
   );
@@ -199,17 +318,9 @@ function Label({ children, className = "" }: { children: React.ReactNode; classN
 }
 function Row({ label, value, bold, negative, small, large }: { label: string; value: number; bold?: boolean; negative?: boolean; small?: boolean; large?: boolean }) {
   return (
-    <div className={`flex justify-between ${bold ? "font-bold" : ""} ${small ? "text-xs" : ""} ${large ? "text-base" : ""}`}>
+    <div className={`flex justify-between ${bold ? "font-bold" : ""} ${small ? "text-xs" : ""} ${large ? "text-lg" : ""}`}>
       <span>{label}</span>
-      <span>{negative ? "-" : ""}₹ {value.toFixed(2)}</span>
-    </div>
-  );
-}
-function TaxInput({ label, v, on }: { label: string; v: number; on: (v: number) => void }) {
-  return (
-    <div>
-      <label className="text-[10px] uppercase block">{label}</label>
-      <input type="number" value={v || ""} onChange={(e) => on(Number(e.target.value))} className="w-full px-2 py-1.5 rounded border border-border bg-background text-xs" placeholder="0" />
+      <span className="font-mono">{negative ? "− " : ""}₹ {Math.round(value).toLocaleString("en-IN")}</span>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Printer, ArrowLeft, FileText, Download, CheckCircle2 } from "lucide-react";
+import { Printer, ArrowLeft, FileText, Download, CheckCircle2, XCircle, Ban } from "lucide-react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { SITE } from "@/lib/site";
 import logo from "@/assets/devki-logo.png";
@@ -12,14 +13,31 @@ export const Route = createFileRoute("/admin/bills/$id")({
 function BillView() {
   const { id } = Route.useParams();
   const [bill, setBill] = useState<any>(null);
-  useEffect(() => { (async () => {
+  const [busy, setBusy] = useState(false);
+
+  async function load() {
     const { data } = await supabase.from("bills").select("*").eq("id", id).single();
     setBill(data);
-  })(); }, [id]);
+  }
+  useEffect(() => { load(); /* eslint-disable-next-line */ }, [id]);
+
+  async function toggleCancel() {
+    if (!bill) return;
+    const cancelling = bill.status !== "cancelled";
+    if (cancelling && !confirm("Cancel this bill? It will be excluded from monthly & yearly revenue.")) return;
+    if (!cancelling && !confirm("Reactivate this bill? It will be counted again in revenue.")) return;
+    setBusy(true);
+    const { error } = await supabase.from("bills").update({ status: cancelling ? "cancelled" : "active" } as any).eq("id", id);
+    setBusy(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success(cancelling ? "Bill cancelled" : "Bill reactivated");
+    load();
+  }
 
   if (!bill) return <div className="text-muted-foreground p-8 text-center">Loading…</div>;
   const items = (bill.particulars as any[]) || [];
   const totalQty = items.length;
+  const cancelled = bill.status === "cancelled";
 
   return (
     <div className="max-w-5xl mx-auto">
@@ -30,7 +48,10 @@ function BillView() {
             <FileText className="w-6 h-6 text-primary" />
           </div>
           <div>
-            <div className="font-display text-xl font-bold">Tax Invoice #{bill.bill_number}</div>
+            <div className="font-display text-xl font-bold flex items-center gap-2">
+              Tax Invoice #{bill.bill_number}
+              {cancelled && <span className="text-[10px] uppercase tracking-widest px-2 py-0.5 rounded-full bg-destructive/10 text-destructive font-semibold">Cancelled</span>}
+            </div>
             <div className="text-sm text-muted-foreground">{bill.customer_name} · {new Date(bill.bill_date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</div>
           </div>
         </div>
@@ -44,16 +65,26 @@ function BillView() {
           <button onClick={() => window.print()} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-foreground text-background font-semibold hover:opacity-90 transition">
             <Download className="w-4 h-4" />Save as PDF
           </button>
+          <button onClick={toggleCancel} disabled={busy} className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition text-sm ${cancelled ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200" : "bg-destructive/10 text-destructive hover:bg-destructive hover:text-white"}`}>
+            {cancelled ? <CheckCircle2 className="w-4 h-4" /> : <Ban className="w-4 h-4" />}
+            {cancelled ? "Reactivate" : "Cancel Bill"}
+          </button>
         </div>
       </div>
 
       <div className="no-print mb-6 flex items-center gap-3 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-sm">
         <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-        <span className="text-emerald-800">Government-ready format. Print produces a clean A4 invoice — sidebar and navigation are hidden.</span>
+        <span className="text-emerald-800">A4-optimised, government-grade format. Use <b>Save as PDF</b> from the print dialog and select <b>A4</b>.</span>
       </div>
 
-      {/* PRINT AREA — formal, government-grade tax invoice */}
-      <div id="print-area" className="bg-white text-black shadow-elegant border border-gray-300 print:shadow-none print:border print:border-black">
+      {/* PRINT AREA — fills full A4 */}
+      <div id="print-area" className="bg-white text-black shadow-elegant border border-gray-300 print:shadow-none print:border-0 relative">
+        {cancelled && (
+          <div className="absolute inset-0 pointer-events-none flex items-center justify-center z-20" aria-hidden>
+            <div className="rotate-[-22deg] border-[6px] border-red-600 text-red-600 px-12 py-3 text-5xl font-extrabold tracking-[0.4em] opacity-25">CANCELLED</div>
+          </div>
+        )}
+
         {/* Title strip */}
         <div className="text-center border-b-2 border-black py-2">
           <div className="text-[11px] tracking-[0.4em] font-bold text-gray-700">TAX INVOICE</div>
@@ -116,11 +147,11 @@ function BillView() {
                 <td className="p-2 text-center border border-gray-400">{i + 1}</td>
                 <td className="p-2 border border-gray-400 font-medium">{it.particulars}</td>
                 <td className="p-2 text-center border border-gray-400 font-mono">9964</td>
-                <td className="p-2 text-right border border-gray-400 font-mono">{it.rate ? Number(it.rate).toFixed(2) : "—"}</td>
-                <td className="p-2 text-right border border-gray-400 font-mono font-semibold">{it.amount ? Number(it.amount).toFixed(2) : "—"}</td>
+                <td className="p-2 text-right border border-gray-400 font-mono">{it.rate ? Math.round(Number(it.rate)).toLocaleString("en-IN") : "—"}</td>
+                <td className="p-2 text-right border border-gray-400 font-mono font-semibold">{it.amount ? Math.round(Number(it.amount)).toLocaleString("en-IN") : "—"}</td>
               </tr>
             ))}
-            {Array.from({ length: Math.max(0, 6 - items.length) }).map((_, i) => (
+            {Array.from({ length: Math.max(0, 8 - items.length) }).map((_, i) => (
               <tr key={`e${i}`}>
                 <td className="p-2 border border-gray-400">&nbsp;</td>
                 <td className="p-2 border border-gray-400"></td>
@@ -131,7 +162,7 @@ function BillView() {
             ))}
             <tr className="bg-gray-100 font-semibold">
               <td className="p-2 text-center border border-black" colSpan={4}>Subtotal ({totalQty} item{totalQty !== 1 ? "s" : ""})</td>
-              <td className="p-2 text-right border border-black font-mono">{Number(bill.subtotal).toFixed(2)}</td>
+              <td className="p-2 text-right border border-black font-mono">{Math.round(Number(bill.subtotal)).toLocaleString("en-IN")}</td>
             </tr>
           </tbody>
         </table>
@@ -141,11 +172,11 @@ function BillView() {
           <div className="p-4 border-r border-black text-[11px] space-y-2">
             <div>
               <div className="text-[10px] uppercase tracking-widest text-gray-600 font-bold mb-1">Bank Details</div>
-              <div className="font-semibold text-[12px]">{bill.bank_name || "—"}</div>
+              <div className="font-semibold text-[12px] leading-relaxed">{bill.bank_name || "—"}</div>
             </div>
             <div className="pt-2 border-t border-gray-300">
-              <div className="flex justify-between"><span>Less: Advance Received</span><span className="font-mono font-semibold">₹ {Number(bill.less_advance).toFixed(2)}</span></div>
-              <div className="flex justify-between mt-1"><span className="font-semibold">Balance Due</span><span className="font-mono font-bold">₹ {(Number(bill.subtotal) - Number(bill.less_advance)).toFixed(2)}</span></div>
+              <div className="flex justify-between"><span>Less: Advance Received</span><span className="font-mono font-semibold">₹ {Math.round(Number(bill.less_advance)).toLocaleString("en-IN")}</span></div>
+              <div className="flex justify-between mt-1"><span className="font-semibold">Balance Due</span><span className="font-mono font-bold">₹ {Math.round(Number(bill.subtotal) - Number(bill.less_advance)).toLocaleString("en-IN")}</span></div>
             </div>
             {bill.notes && (
               <div className="pt-2 border-t border-gray-300">
@@ -162,7 +193,7 @@ function BillView() {
             <div className="mt-3 pt-2 border-t-2 border-black">
               <div className="flex justify-between items-center bg-[#0b2545] text-white px-3 py-2 rounded-sm">
                 <span className="font-bold tracking-wider text-[12px]">GRAND TOTAL</span>
-                <span className="font-mono font-extrabold text-[15px]">₹ {Number(bill.grand_total).toFixed(2)}</span>
+                <span className="font-mono font-extrabold text-[15px]">₹ {Math.round(Number(bill.grand_total)).toLocaleString("en-IN")}</span>
               </div>
             </div>
           </div>
@@ -183,10 +214,29 @@ function BillView() {
             </div>
             <div className="text-[10px] text-gray-600 mt-2 font-semibold">E. &amp; O.E.</div>
           </div>
-          <div className="p-4 text-right">
-            <div className="font-semibold text-gray-800">For DEVKI TRAVELS</div>
-            <div className="h-16" />
-            <div className="border-t border-black inline-block px-8 pt-1 font-semibold">Authorised Signatory</div>
+          <div className="p-4 text-right relative">
+            <div className="font-bold text-[#0b2545] text-[13px] tracking-wide">For DEVKI TRAVELS</div>
+            {/* Signature placeholder block — user can replace with uploaded signature */}
+            <div className="mt-3 mb-2 flex justify-end">
+              <div className="w-44 h-14 flex items-center justify-end">
+                <div
+                  className="font-semibold text-[#0b2545] italic text-[20px] leading-none -rotate-3 select-none"
+                  style={{ fontFamily: "'Brush Script MT', 'Lucida Handwriting', cursive" }}
+                >
+                  Devki Travels
+                </div>
+              </div>
+            </div>
+            {/* Stamp/seal */}
+            <div className="absolute right-6 bottom-14 w-24 h-24 border-[2.5px] border-amber-700 rounded-full flex items-center justify-center rotate-[-12deg] opacity-80 pointer-events-none">
+              <div className="text-center text-amber-700">
+                <div className="text-[7px] font-extrabold tracking-[0.2em]">★ AUTHORISED ★</div>
+                <div className="text-[10px] font-extrabold tracking-wider mt-0.5">DEVKI</div>
+                <div className="text-[10px] font-extrabold tracking-wider">TRAVELS</div>
+                <div className="text-[7px] font-bold tracking-[0.2em] mt-0.5">DEHRADUN</div>
+              </div>
+            </div>
+            <div className="border-t border-black inline-block px-8 pt-1 font-semibold mt-2">Authorised Signatory</div>
           </div>
         </div>
 
@@ -196,10 +246,10 @@ function BillView() {
         </div>
       </div>
 
-      {/* Print-only stylesheet — isolates the bill */}
+      {/* Print-only stylesheet — fills full A4 */}
       <style>{`
         @media print {
-          @page { size: A4; margin: 12mm; }
+          @page { size: A4 portrait; margin: 8mm; }
           html, body { background: white !important; margin: 0 !important; padding: 0 !important; }
           body * { visibility: hidden !important; }
           #print-area, #print-area * { visibility: visible !important; }
@@ -207,13 +257,18 @@ function BillView() {
             position: absolute !important;
             left: 0 !important; top: 0 !important; right: 0 !important;
             width: 100% !important;
+            min-height: calc(297mm - 16mm) !important;
             margin: 0 !important;
             box-shadow: none !important;
             border-radius: 0 !important;
+            border: none !important;
+            display: flex !important;
+            flex-direction: column !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
             color-adjust: exact !important;
           }
+          #print-area > table { flex: 1 1 auto !important; }
           #print-area * {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
@@ -230,7 +285,7 @@ function RowP({ label, value }: { label: string; value: any }) {
   return (
     <div className="flex justify-between py-1 text-gray-800">
       <span>{label}</span>
-      <span className="font-mono font-semibold">₹ {Number(value || 0).toFixed(2)}</span>
+      <span className="font-mono font-semibold">₹ {Math.round(Number(value || 0)).toLocaleString("en-IN")}</span>
     </div>
   );
 }

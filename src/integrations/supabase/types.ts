@@ -35,6 +35,7 @@ export type Database = {
           particulars: Json
           sgst_amount: number | null
           sgst_percent: number | null
+          status: string
           subtotal: number
         }
         Insert: {
@@ -57,6 +58,7 @@ export type Database = {
           particulars?: Json
           sgst_amount?: number | null
           sgst_percent?: number | null
+          status?: string
           subtotal?: number
         }
         Update: {
@@ -79,6 +81,7 @@ export type Database = {
           particulars?: Json
           sgst_amount?: number | null
           sgst_percent?: number | null
+          status?: string
           subtotal?: number
         }
         Relationships: []
