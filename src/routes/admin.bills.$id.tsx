@@ -215,27 +215,9 @@ function BillView() {
             <div className="text-[10px] text-gray-600 mt-2 font-semibold">E. &amp; O.E.</div>
           </div>
           <div className="p-4 text-right relative">
-            <div className="font-bold text-[#0b2545] text-[13px] tracking-wide">For DEVKI TRAVELS</div>
-            {/* Signature placeholder block — user can replace with uploaded signature */}
-            <div className="mt-3 mb-2 flex justify-end">
-              <div className="w-44 h-14 flex items-center justify-end">
-                <div
-                  className="font-semibold text-[#0b2545] italic text-[20px] leading-none -rotate-3 select-none"
-                  style={{ fontFamily: "'Brush Script MT', 'Lucida Handwriting', cursive" }}
-                >
-                  Devki Travels
-                </div>
-              </div>
-            </div>
-            {/* Stamp/seal */}
-            <div className="absolute right-6 bottom-14 w-24 h-24 border-[2.5px] border-amber-700 rounded-full flex items-center justify-center rotate-[-12deg] opacity-80 pointer-events-none">
-              <div className="text-center text-amber-700">
-                <div className="text-[7px] font-extrabold tracking-[0.2em]">★ AUTHORISED ★</div>
-                <div className="text-[10px] font-extrabold tracking-wider mt-0.5">DEVKI</div>
-                <div className="text-[10px] font-extrabold tracking-wider">TRAVELS</div>
-                <div className="text-[7px] font-bold tracking-[0.2em] mt-0.5">DEHRADUN</div>
-              </div>
-            </div>
+            <div className="font-bold text-[#0b2545] text-[13px] tracking-wide">For DEVKI TRAVELS Propritor</div>
+            {/* Empty space reserved for physical signature */}
+            <div className="h-20" />
             <div className="border-t border-black inline-block px-8 pt-1 font-semibold mt-2">Authorised Signatory</div>
           </div>
         </div>

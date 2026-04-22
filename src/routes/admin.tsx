@@ -17,7 +17,7 @@ const items = [
   { to: "/admin/queries", label: "Contact Queries", icon: MessageSquare },
   { to: "/admin/bookings", label: "Bookings", icon: Calendar },
   { to: "/admin/drivers", label: "Driver Applications", icon: IdCard },
-  { to: "/admin/content", label: "Site Content", icon: Settings },
+  { to: "/admin/content", label: "About / Mission / Founders", icon: Settings },
 ];
 
 function hasStoredSessionHint() {
