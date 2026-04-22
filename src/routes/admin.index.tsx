@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { FileText, MessageSquare, Calendar, FileSignature, TrendingUp, IdCard, ArrowUpRight, Sparkles, Activity } from "lucide-react";
+import { FileText, MessageSquare, Calendar, FileSignature, TrendingUp, IdCard, ArrowUpRight, Sparkles, Activity, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/admin/")({
