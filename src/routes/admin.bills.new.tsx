@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Plus, Trash2, Save, Printer, Car, Fuel, Route as RouteIcon } from "lucide-react";
+import { Plus, Trash2, Save, Printer, Car, Receipt, Wallet } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { SITE } from "@/lib/site";
@@ -50,8 +50,10 @@ function NewBillPage() {
   const [items, setItems] = useState<Item[]>([
     { particulars: "Vehicle Hire — ", rate: 0, amount: 0 },
   ]);
-  const [kmAmount, setKmAmount] = useState(0);
-  const [fuelAmount, setFuelAmount] = useState(0);
+  const [additionalLabel, setAdditionalLabel] = useState("Additional Details & Charges");
+  const [additionalAmount, setAdditionalAmount] = useState(0);
+  const [extraLabel, setExtraLabel] = useState("Extra Expenses (Toll, Night Halt, Parking etc.)");
+  const [extraAmount, setExtraAmount] = useState(0);
   const [gstMode, setGstMode] = useState<"none" | "exclusive" | "inclusive">("none");
   const [gstType, setGstType] = useState<"cgst_sgst" | "igst">("cgst_sgst");
   const [gstRate, setGstRate] = useState(5);
@@ -85,9 +87,9 @@ function NewBillPage() {
   }, [vehicleSubtotal, gstMode, gstRate, gstType]);
 
   // Final layout per spec:
-  // (vehicle taxable + GST) + KM amount + Fuel amount − advance
+  // (vehicle taxable + GST) + Additional + Extra − advance
   const vehicleWithGst = gstMode === "inclusive" ? vehicleSubtotal : taxableValue + totalGst;
-  const grandTotal = Math.round(vehicleWithGst + Number(kmAmount || 0) + Number(fuelAmount || 0) - Number(advance || 0));
+  const grandTotal = Math.round(vehicleWithGst + Number(additionalAmount || 0) + Number(extraAmount || 0) - Number(advance || 0));
 
   function updateItem(i: number, patch: Partial<Item>) {
     setItems((arr) => arr.map((it, idx) => idx === i ? { ...it, ...patch } : it));
@@ -100,11 +102,11 @@ function NewBillPage() {
     if (vehicleSubtotal <= 0) { toast.error("Add at least one vehicle/particular item"); return; }
     setSaving(true);
 
-    // Pack KM/fuel as additional particulars rows so the printable bill renders them too
+    // Pack additional + extra as particulars rows so the printable bill renders them too
     const allParticulars = [
       ...items,
-      ...(kmAmount > 0 ? [{ particulars: "Kilometre Travel Charges", rate: 0, amount: Math.round(kmAmount) }] : []),
-      ...(fuelAmount > 0 ? [{ particulars: "Fuel Charges", rate: 0, amount: Math.round(fuelAmount) }] : []),
+      ...(additionalAmount > 0 ? [{ particulars: additionalLabel || "Additional Details & Charges", rate: 0, amount: Math.round(additionalAmount) }] : []),
+      ...(extraAmount > 0 ? [{ particulars: extraLabel || "Extra Expenses (Toll, Night Halt, Parking etc.)", rate: 0, amount: Math.round(extraAmount) }] : []),
     ];
 
     const bankString = `${selectedBank.name}  •  A/C No: ${selectedBank.account}  •  IFSC: ${selectedBank.ifsc}`;
@@ -115,7 +117,7 @@ function NewBillPage() {
       customer_address: customer.address,
       gstin: SITE.gstin,
       particulars: allParticulars as any,
-      subtotal: Math.round(vehicleSubtotal + Number(kmAmount || 0) + Number(fuelAmount || 0)),
+      subtotal: Math.round(vehicleSubtotal + Number(additionalAmount || 0) + Number(extraAmount || 0)),
       less_advance: Math.round(advance),
       cgst_percent: gstType === "cgst_sgst" ? gstRate / 2 : 0,
       sgst_percent: gstType === "cgst_sgst" ? gstRate / 2 : 0,
@@ -209,17 +211,19 @@ function NewBillPage() {
           </button>
         </div>
 
-        {/* KM + Fuel block */}
+        {/* Additional + Extra blocks */}
         <div className="grid md:grid-cols-2 gap-4 mt-6">
           <div className="border border-border rounded-xl p-4 bg-gradient-to-br from-blue-50/40 to-transparent">
-            <Label className="flex items-center gap-1.5"><RouteIcon className="w-3.5 h-3.5 text-blue-600" />Kilometre Travel Amount (₹)</Label>
-            <input type="number" value={kmAmount || ""} onChange={(e) => setKmAmount(Math.round(Number(e.target.value)))} className="input" placeholder="e.g., 4500" />
-            <p className="text-[10px] text-muted-foreground mt-1.5">Optional — distance / per-km charges. Added on top of vehicle total.</p>
+            <Label className="flex items-center gap-1.5"><Wallet className="w-3.5 h-3.5 text-blue-600" />Additional Details & Charges</Label>
+            <input value={additionalLabel} onChange={(e) => setAdditionalLabel(e.target.value)} className="input" placeholder="Description (e.g., KM travel, fuel, driver allowance)" />
+            <input type="number" value={additionalAmount || ""} onChange={(e) => setAdditionalAmount(Math.round(Number(e.target.value)))} className="input mt-2" placeholder="Amount (₹)" />
+            <p className="text-[10px] text-muted-foreground mt-1.5">Optional — added on top of vehicle total.</p>
           </div>
           <div className="border border-border rounded-xl p-4 bg-gradient-to-br from-amber-50/40 to-transparent">
-            <Label className="flex items-center gap-1.5"><Fuel className="w-3.5 h-3.5 text-amber-600" />Fuel Charges (₹)</Label>
-            <input type="number" value={fuelAmount || ""} onChange={(e) => setFuelAmount(Math.round(Number(e.target.value)))} className="input" placeholder="e.g., 2300" />
-            <p className="text-[10px] text-muted-foreground mt-1.5">Optional — fuel reimbursement. Added on top of vehicle total.</p>
+            <Label className="flex items-center gap-1.5"><Receipt className="w-3.5 h-3.5 text-amber-600" />Extra Expenses (Toll, Night Halt etc.)</Label>
+            <input value={extraLabel} onChange={(e) => setExtraLabel(e.target.value)} className="input" placeholder="Description (e.g., Toll + Night Halt + Parking)" />
+            <input type="number" value={extraAmount || ""} onChange={(e) => setExtraAmount(Math.round(Number(e.target.value)))} className="input mt-2" placeholder="Amount (₹)" />
+            <p className="text-[10px] text-muted-foreground mt-1.5">Optional — added on top of grand total.</p>
           </div>
         </div>
 
@@ -287,8 +291,8 @@ function NewBillPage() {
                 <Row label="Vehicle (incl. GST)" value={vehicleWithGst} bold />
               </>
             )}
-            {kmAmount > 0 && <Row label="+ Kilometre Travel" value={Math.round(kmAmount)} />}
-            {fuelAmount > 0 && <Row label="+ Fuel Charges" value={Math.round(fuelAmount)} />}
+            {additionalAmount > 0 && <Row label={`+ ${additionalLabel || "Additional Charges"}`} value={Math.round(additionalAmount)} />}
+            {extraAmount > 0 && <Row label={`+ ${extraLabel || "Extra Expenses"}`} value={Math.round(extraAmount)} />}
             {advance > 0 && <Row label="− Less Advance" value={Math.round(advance)} negative />}
             <div className="border-t-2 border-foreground pt-2 mt-2">
               <Row label="GRAND TOTAL" value={grandTotal} bold large />
