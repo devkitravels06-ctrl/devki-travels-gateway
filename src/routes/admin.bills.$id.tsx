@@ -92,25 +92,26 @@ function BillView() {
         </div>
 
         {/* Letterhead */}
-        <div className="px-8 py-5 print:px-6 print:py-4 border-b-2 border-black">
-          <div className="flex justify-between items-start gap-6">
-            <div className="flex items-start gap-4 flex-1">
-              <img src={logo} alt="Devki Travels" className="w-24 h-24 object-contain shrink-0" />
+        <div className="px-6 py-3 print:px-5 print:py-2 border-b-2 border-black">
+          <div className="flex justify-between items-start gap-4">
+            <div className="flex items-start gap-3 flex-1">
+              <img src={logo} alt="Devki Travels" className="w-20 h-20 print:w-16 print:h-16 object-contain shrink-0" />
               <div className="flex-1">
-                <div className="font-display font-extrabold text-[26px] leading-tight tracking-wide text-[#0b2545]">DEVKI TRAVELS</div>
+                <div className="font-display font-extrabold text-[24px] print:text-[20px] leading-tight tracking-wide text-[#0b2545]">DEVKI TRAVELS</div>
                 <div className="text-[10px] uppercase tracking-[0.25em] text-amber-600 font-semibold mt-0.5">Travel Uttarakhand · Travel Comfortably</div>
-                <div className="text-[11px] text-gray-700 mt-1 italic">Deals In : (AC / Non AC) Innova · Tavera · Scorpio · Tempo Traveller · Tata Indica / Indigo</div>
-                <div className="text-[11px] text-gray-800 mt-2 leading-relaxed">
+                <div className="text-[10px] text-gray-700 mt-0.5 italic">Deals In : (AC / Non AC) Innova · Tavera · Scorpio · Tempo Traveller · Tata Indica / Indigo</div>
+                <div className="text-[10px] text-gray-800 mt-1 leading-snug">
                   <div><span className="font-semibold">Address:</span> {SITE.address}</div>
                   <div className="mt-0.5"><span className="font-semibold">Mobile:</span> {SITE.phone1}, {SITE.phone2} &nbsp;·&nbsp; <span className="font-semibold">Email:</span> {SITE.email}</div>
                 </div>
               </div>
             </div>
-            <div className="text-right text-[11px] border border-gray-400 rounded p-2 min-w-[180px]">
-              <div className="font-bold text-[#0b2545] tracking-wider">GSTIN</div>
-              <div className="font-mono font-semibold text-[12px]">{bill.gstin || "—"}</div>
-              <div className="font-bold text-[#0b2545] tracking-wider mt-2">STATE</div>
-              <div className="font-mono">Uttarakhand (05)</div>
+            <div className="text-right text-[10px] border-2 border-[#0b2545] rounded-md p-2.5 min-w-[170px] bg-gradient-to-br from-blue-50 to-white shadow-sm">
+              <div className="font-bold text-[#0b2545] tracking-[0.18em] text-[9px] uppercase">GSTIN</div>
+              <div className="font-mono font-bold text-[12px] text-[#0b2545] tracking-wide mt-0.5">{bill.gstin || "—"}</div>
+              <div className="border-t border-gray-300 my-1.5" />
+              <div className="font-bold text-[#0b2545] tracking-[0.18em] text-[9px] uppercase">State</div>
+              <div className="font-mono font-semibold text-[11px] mt-0.5">Uttarakhand (05)</div>
             </div>
           </div>
         </div>
@@ -144,25 +145,25 @@ function BillView() {
           <tbody>
             {items.map((it, i) => (
               <tr key={i} className="bg-white">
-                <td className="p-2 text-center border border-gray-400">{i + 1}</td>
-                <td className="p-2 border border-gray-400 font-medium">{it.particulars}</td>
-                <td className="p-2 text-center border border-gray-400 font-mono">9964</td>
-                <td className="p-2 text-right border border-gray-400 font-mono">{it.rate ? Math.round(Number(it.rate)).toLocaleString("en-IN") : "—"}</td>
-                <td className="p-2 text-right border border-gray-400 font-mono font-semibold">{it.amount ? Math.round(Number(it.amount)).toLocaleString("en-IN") : "—"}</td>
+                <td className="p-1.5 text-center border border-gray-400">{i + 1}</td>
+                <td className="p-1.5 border border-gray-400 font-medium">{it.particulars}</td>
+                <td className="p-1.5 text-center border border-gray-400 font-mono">9964</td>
+                <td className="p-1.5 text-right border border-gray-400 font-mono">{it.rate ? Math.round(Number(it.rate)).toLocaleString("en-IN") : "—"}</td>
+                <td className="p-1.5 text-right border border-gray-400 font-mono font-semibold">{it.amount ? Math.round(Number(it.amount)).toLocaleString("en-IN") : "—"}</td>
               </tr>
             ))}
-            {Array.from({ length: Math.max(0, 8 - items.length) }).map((_, i) => (
+            {Array.from({ length: Math.max(0, 4 - items.length) }).map((_, i) => (
               <tr key={`e${i}`}>
-                <td className="p-2 border border-gray-400">&nbsp;</td>
-                <td className="p-2 border border-gray-400"></td>
-                <td className="p-2 border border-gray-400"></td>
-                <td className="p-2 border border-gray-400"></td>
-                <td className="p-2 border border-gray-400"></td>
+                <td className="p-1.5 border border-gray-400">&nbsp;</td>
+                <td className="p-1.5 border border-gray-400"></td>
+                <td className="p-1.5 border border-gray-400"></td>
+                <td className="p-1.5 border border-gray-400"></td>
+                <td className="p-1.5 border border-gray-400"></td>
               </tr>
             ))}
             <tr className="bg-gray-100 font-semibold">
-              <td className="p-2 text-center border border-black" colSpan={4}>Subtotal ({totalQty} item{totalQty !== 1 ? "s" : ""})</td>
-              <td className="p-2 text-right border border-black font-mono">{Math.round(Number(bill.subtotal)).toLocaleString("en-IN")}</td>
+              <td className="p-1.5 text-center border border-black" colSpan={4}>Subtotal ({totalQty} item{totalQty !== 1 ? "s" : ""})</td>
+              <td className="p-1.5 text-right border border-black font-mono">{Math.round(Number(bill.subtotal)).toLocaleString("en-IN")}</td>
             </tr>
           </tbody>
         </table>
@@ -206,19 +207,19 @@ function BillView() {
         </div>
 
         {/* Declaration + signature */}
-        <div className="grid grid-cols-2 text-[11px]">
-          <div className="p-4 border-r border-black">
+        <div className="grid grid-cols-2 text-[10px]">
+          <div className="p-3 border-r border-black">
             <div className="text-[10px] uppercase tracking-widest text-gray-600 font-bold mb-1">Declaration</div>
-            <div className="text-gray-800 leading-snug">
+            <div className="text-gray-800 leading-snug text-[10px]">
               We declare that this invoice shows the actual price of the services described and that all particulars are true and correct. All disputes subject to <span className="font-semibold">Dehradun</span> jurisdiction only.
             </div>
-            <div className="text-[10px] text-gray-600 mt-2 font-semibold">E. &amp; O.E.</div>
+            <div className="text-[9px] text-gray-600 mt-1 font-semibold">E. &amp; O.E.</div>
           </div>
-          <div className="p-4 text-right relative">
-            <div className="font-bold text-[#0b2545] text-[13px] tracking-wide">For DEVKI TRAVELS Propritor</div>
+          <div className="p-3 text-right relative flex flex-col">
+            <div className="font-semibold text-[#0b2545] text-[14px] tracking-wide" style={{ fontFamily: "Arial, Helvetica, sans-serif" }}>For DEVKI TRAVELS</div>
+            <div className="font-semibold text-[#0b2545] text-[12px] tracking-wide mt-1" style={{ fontFamily: "Arial, Helvetica, sans-serif" }}>Proprietor</div>
             {/* Empty space reserved for physical signature */}
-            <div className="h-20" />
-            <div className="border-t border-black inline-block px-8 pt-1 font-semibold mt-2">Authorised Signatory</div>
+            <div className="h-10" />
           </div>
         </div>
 
@@ -228,10 +229,10 @@ function BillView() {
         </div>
       </div>
 
-      {/* Print-only stylesheet — fills full A4 */}
+      {/* Print-only stylesheet — fits a single A4 page */}
       <style>{`
         @media print {
-          @page { size: A4 portrait; margin: 8mm; }
+          @page { size: A4 portrait; margin: 6mm; }
           html, body { background: white !important; margin: 0 !important; padding: 0 !important; }
           body * { visibility: hidden !important; }
           #print-area, #print-area * { visibility: visible !important; }
@@ -239,18 +240,22 @@ function BillView() {
             position: absolute !important;
             left: 0 !important; top: 0 !important; right: 0 !important;
             width: 100% !important;
-            min-height: calc(297mm - 16mm) !important;
+            max-height: calc(297mm - 12mm) !important;
             margin: 0 !important;
+            padding: 0 !important;
             box-shadow: none !important;
             border-radius: 0 !important;
             border: none !important;
-            display: flex !important;
-            flex-direction: column !important;
+            font-size: 10px !important;
+            page-break-inside: avoid !important;
+            page-break-after: avoid !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
             color-adjust: exact !important;
           }
-          #print-area > table { flex: 1 1 auto !important; }
+          #print-area, #print-area table, #print-area tr, #print-area td, #print-area div {
+            page-break-inside: avoid !important;
+          }
           #print-area * {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
