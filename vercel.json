@@ -2,12 +2,18 @@
   "buildCommand": "bun run build",
   "installCommand": "bun install",
   "devCommand": "bun run dev",
-  "public": true,
+  "outputDirectory": "dist",
   "cleanUrls": true,
   "trailingSlash": false,
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
   "headers": [
     {
-      "source": "/favicon.png",
+      "source": "/favicon.(png|ico)",
       "headers": [
         {
           "key": "Cache-Control",
@@ -16,7 +22,7 @@
       ]
     },
     {
-      "source": "/favicon.ico",
+      "source": "/assets/(.*)",
       "headers": [
         {
           "key": "Cache-Control",
